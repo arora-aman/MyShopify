@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MyShopify</string>
+    <string name="nap_batz">Napoleon Batz spent $%.2f.</string>
+    <string name="awesome_bronze_bag">Number of Awesome Bronze Bag sold = %d.</string>
+</resources>
