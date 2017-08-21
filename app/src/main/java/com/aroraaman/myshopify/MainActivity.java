@@ -1,13 +1,24 @@
 package com.aroraaman.myshopify;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aroraaman.myshopify.model.ChartEntry;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 
 import org.json.JSONException;
 
@@ -24,46 +35,73 @@ import okhttp3.ResponseBody;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView textView1, textView2;
+    PieChart mChartBatz;
+    PieChart mChartAwesomeBags;
+    TextView mLoadingTextView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        layout.setLayoutParams(params);
+        layout.setPadding(10, 0, 10, 0);
 
-        textView1 = findViewById(R.id.textView1);
-        textView2 = findViewById(R.id.textView2);
+        mChartBatz = createChart();
+        mChartAwesomeBags = createChart();
+
+        mLoadingTextView = new TextView(this);
+        mLoadingTextView.setLayoutParams(params);
+        mLoadingTextView.setGravity(Gravity.CENTER);
+        mLoadingTextView.setText(R.string.fetching_data);
+
+        layout.addView(mLoadingTextView);
+        layout.addView(mChartBatz);
+        layout.addView(mChartAwesomeBags);
+
+        setContentView(layout);
 
         OkHttpClient httpClient = new OkHttpClient();
         Request request = new Request.Builder()
                 .url("https://shopicruit.myshopify.com/admin/orders.json?page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6")
                 .build();
 
-        httpClient.newCall(request).enqueue(new ResponseCallback(new WeakReference<>(textView1), new WeakReference<>(textView2)));
-
+        httpClient.newCall(request).enqueue(new ResponseCallback(new WeakReference<>(mLoadingTextView), new WeakReference<>(mChartBatz), new WeakReference<>(mChartAwesomeBags)));
     }
 
     private class ResponseCallback implements Callback {
 
-        final WeakReference<TextView> weakTextView1, weakTextView2;
+        final WeakReference<TextView> loadingTextView;
+        final WeakReference<PieChart> weakChartBatz, weakPieChartAwesomeBags;
 
-        private ResponseCallback(WeakReference<TextView> weakTextView1, WeakReference<TextView> weakTextView2) {
-            this.weakTextView1 = weakTextView1;
-            this.weakTextView2 = weakTextView2;
+        private ResponseCallback(WeakReference<TextView> loadingTextView, WeakReference<PieChart> weakChartBatz, WeakReference<PieChart> weakPieChartAwesomeBags) {
+            this.loadingTextView = loadingTextView;
+            this.weakChartBatz = weakChartBatz;
+            this.weakPieChartAwesomeBags = weakPieChartAwesomeBags;
         }
 
         @Override
         public void onResponse(Call call, Response response) throws IOException {
             if (response.isSuccessful()) {
-                double totalSpent = 0;
-                int totalQuantity = 0;
-
-                    ResponseBody body = response.body();
-                    if (body == null) {
-                        Toast.makeText(MainActivity.this, "Response body is empty", Toast.LENGTH_LONG).show();
-                        return;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadingTextView.get().setText(R.string.crunching_numbers);
                     }
-                    String jsonString = body.string();
+                });
+                double batzExpenditure = 0;
+                double othersExpenditure = 0;
+                int awesomeBagsSold = 0;
+                int otherItemsSold = 0;
+
+                ResponseBody body = response.body();
+                if (body == null) {
+                    Toast.makeText(MainActivity.this, "Response body is empty", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                String jsonString = body.string();
 
                 ArrayList<Order> data;
 
@@ -74,25 +112,45 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                for (Order order: data) {
+                for (Order order : data) {
                     if (order.customer != null && "Napoleon".equals(order.customer.firstName) && "Batz".equals(order.customer.lastName)) {
-                        totalSpent += order.totalPrice;
+                        batzExpenditure += order.totalPrice;
+                    } else {
+                        othersExpenditure += order.totalPrice;
                     }
-                    for (Item item: order.items) {
+                    for (Item item : order.items) {
                         if ("Awesome Bronze Bag".equals(item.title)) {
-                            totalQuantity += item.quantity;
+                            awesomeBagsSold += item.quantity;
+                        } else {
+                            otherItemsSold += item.quantity;
                         }
                     }
                 }
 
-                final double constTotalSpent = totalSpent;
-                final int constTotalQuantity = totalQuantity;
+                final ArrayList<ChartEntry> batzPieEntries = new ArrayList<>();
+                batzPieEntries.add(new ChartEntry(getString(R.string.nap_batz),
+                        (float) batzExpenditure, Color.rgb(39, 111, 191)));
+                batzPieEntries.add(new ChartEntry(getString(R.string.others),
+                        (float) othersExpenditure, Color.rgb(175, 91, 91)));
+
+
+                final ArrayList<ChartEntry> awesomeBagPieEntries = new ArrayList<>();
+                awesomeBagPieEntries.add(new ChartEntry(getString(R.string.awesome_bronze_bags),
+                        (float) awesomeBagsSold, Color.rgb(240, 58, 71)));
+                awesomeBagPieEntries.add(new ChartEntry(getString(R.string.others),
+                        (float) otherItemsSold, Color.rgb(175, 91, 91)));
+
+
+                final String napBatzLabel = getString(R.string.nap_batz_label, batzExpenditure);
+                final String awesomeBagLabel = getString(R.string.awesome_bronze_bag_label, awesomeBagsSold);
+
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        weakTextView1.get().setText(getString(R.string.nap_batz, constTotalSpent));
-                        weakTextView2.get().setText(getString(R.string.awesome_bronze_bag, constTotalQuantity));
+                        setChartData(weakChartBatz.get(), batzPieEntries, getString(R.string.customer_expenditure), napBatzLabel);
+                        setChartData(weakPieChartAwesomeBags.get(), awesomeBagPieEntries, getString(R.string.items_sold), awesomeBagLabel);
+                        loadingTextView.get().setVisibility(View.GONE);
                     }
                 });
 
@@ -105,5 +163,50 @@ public class MainActivity extends AppCompatActivity {
         public void onFailure(Call call, IOException e) {
             Toast.makeText(MainActivity.this, "Failed to make request", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private PieChart createChart() {
+        PieChart chart = new PieChart(this);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+
+        params.weight = 1;
+        chart.setLayoutParams(params);
+
+        chart.setVisibility(View.GONE);
+
+        return chart;
+    }
+
+    private void setChartData(PieChart chart, ArrayList<ChartEntry> entries, String dataSetLabel, String centerText) {
+        chart.setDrawHoleEnabled(false);
+
+        Legend l = chart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+        l.setOrientation(Legend.LegendOrientation.VERTICAL);
+
+        ArrayList<PieEntry> pieEntries = new ArrayList<>();
+        ArrayList<Integer> colors = new ArrayList<>();
+        for (ChartEntry entry: entries) {
+            pieEntries.add(new PieEntry(entry.value, entry.label));
+            colors.add(entry.color);
+        }
+        PieDataSet dataSet = new PieDataSet(pieEntries, dataSetLabel);
+        dataSet.setColors(colors);
+
+        PieData data = new PieData(dataSet);
+        data.setValueTextSize(0f);
+        chart.setData(data);
+
+        chart.setCenterText(centerText);
+        chart.setCenterTextSize(12);
+        chart.setCenterTextOffset(0, 10);
+
+        chart.getDescription().setEnabled(false);
+        chart.setDrawEntryLabels(false);
+        chart.invalidate();
+
+        chart.setVisibility(View.VISIBLE);
     }
 }
