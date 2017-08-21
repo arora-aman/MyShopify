@@ -84,6 +84,58 @@ public class MainActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
+    private PieChart createChart() {
+        PieChart chart = new PieChart(this);
+
+        int orientation = getResources().getConfiguration().orientation;
+
+        LinearLayout.LayoutParams params = getOrientationBasedLayoutParams(orientation);
+        chart.setLayoutParams(params);
+
+        chart.setVisibility(View.GONE);
+
+        return chart;
+    }
+
+    private void setChartData(PieChart chart, ArrayList<ChartEntry> entries, String dataSetLabel, String centerText) {
+        chart.setDrawHoleEnabled(false);
+
+        Legend l = chart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+        l.setOrientation(Legend.LegendOrientation.VERTICAL);
+
+        ArrayList<PieEntry> pieEntries = new ArrayList<>();
+        ArrayList<Integer> colors = new ArrayList<>();
+        for (ChartEntry entry: entries) {
+            pieEntries.add(new PieEntry(entry.value, entry.label));
+            colors.add(entry.color);
+        }
+        PieDataSet dataSet = new PieDataSet(pieEntries, dataSetLabel);
+        dataSet.setColors(colors);
+
+        PieData data = new PieData(dataSet);
+        data.setValueTextSize(0f);
+        chart.setData(data);
+
+        chart.setCenterText(centerText);
+        chart.setCenterTextSize(12);
+        chart.setCenterTextOffset(0, 10);
+
+        chart.getDescription().setEnabled(false);
+        chart.setDrawEntryLabels(false);
+        chart.invalidate();
+
+        chart.setVisibility(View.VISIBLE);
+    }
+
+    @NonNull
+    private LinearLayout.LayoutParams getOrientationBasedLayoutParams(int orientation) {
+        return new LinearLayout.LayoutParams(
+                orientation == Configuration.ORIENTATION_PORTRAIT ? ViewGroup.LayoutParams.MATCH_PARENT: 0,
+                orientation == Configuration.ORIENTATION_LANDSCAPE? ViewGroup.LayoutParams.MATCH_PARENT: 0, 1);
+    }
+
     private class ResponseCallback implements Callback {
 
         final WeakReference<TextView> loadingTextView;
@@ -176,58 +228,5 @@ public class MainActivity extends AppCompatActivity {
         public void onFailure(Call call, IOException e) {
             Toast.makeText(MainActivity.this, "Failed to make request", Toast.LENGTH_LONG).show();
         }
-    }
-
-    private PieChart createChart() {
-        PieChart chart = new PieChart(this);
-
-        int orientation = getResources().getConfiguration().orientation;
-
-        LinearLayout.LayoutParams params = getOrientationBasedLayoutParams(orientation);
-
-        chart.setLayoutParams(params);
-
-        chart.setVisibility(View.GONE);
-
-        return chart;
-    }
-
-    @NonNull
-    private LinearLayout.LayoutParams getOrientationBasedLayoutParams(int orientation) {
-        return new LinearLayout.LayoutParams(
-                orientation == Configuration.ORIENTATION_PORTRAIT ? ViewGroup.LayoutParams.MATCH_PARENT: 0,
-                orientation == Configuration.ORIENTATION_LANDSCAPE? ViewGroup.LayoutParams.MATCH_PARENT: 0, 1);
-    }
-
-    private void setChartData(PieChart chart, ArrayList<ChartEntry> entries, String dataSetLabel, String centerText) {
-        chart.setDrawHoleEnabled(false);
-
-        Legend l = chart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-        l.setOrientation(Legend.LegendOrientation.VERTICAL);
-
-        ArrayList<PieEntry> pieEntries = new ArrayList<>();
-        ArrayList<Integer> colors = new ArrayList<>();
-        for (ChartEntry entry: entries) {
-            pieEntries.add(new PieEntry(entry.value, entry.label));
-            colors.add(entry.color);
-        }
-        PieDataSet dataSet = new PieDataSet(pieEntries, dataSetLabel);
-        dataSet.setColors(colors);
-
-        PieData data = new PieData(dataSet);
-        data.setValueTextSize(0f);
-        chart.setData(data);
-
-        chart.setCenterText(centerText);
-        chart.setCenterTextSize(12);
-        chart.setCenterTextOffset(0, 10);
-
-        chart.getDescription().setEnabled(false);
-        chart.setDrawEntryLabels(false);
-        chart.invalidate();
-
-        chart.setVisibility(View.VISIBLE);
     }
 }
