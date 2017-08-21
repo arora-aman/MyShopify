@@ -1,7 +1,9 @@
 package com.aroraaman.myshopify;
 
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
@@ -35,6 +37,7 @@ import okhttp3.ResponseBody;
 
 public class MainActivity extends AppCompatActivity {
 
+    LinearLayout mRootLayout;
     PieChart mChartBatz;
     PieChart mChartAwesomeBags;
     TextView mLoadingTextView;
@@ -42,12 +45,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
+        mRootLayout = new LinearLayout(this);
+        mRootLayout.setOrientation(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
+                LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        layout.setLayoutParams(params);
-        layout.setPadding(10, 0, 10, 0);
+        mRootLayout.setLayoutParams(params);
+        mRootLayout.setPadding(10, 0, 10, 0);
 
         mChartBatz = createChart();
         mChartAwesomeBags = createChart();
@@ -57,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
         mLoadingTextView.setGravity(Gravity.CENTER);
         mLoadingTextView.setText(R.string.fetching_data);
 
-        layout.addView(mLoadingTextView);
-        layout.addView(mChartBatz);
-        layout.addView(mChartAwesomeBags);
+        mRootLayout.addView(mLoadingTextView);
+        mRootLayout.addView(mChartBatz);
+        mRootLayout.addView(mChartAwesomeBags);
 
-        setContentView(layout);
+        setContentView(mRootLayout);
 
         OkHttpClient httpClient = new OkHttpClient();
         Request request = new Request.Builder()
@@ -69,6 +73,15 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         httpClient.newCall(request).enqueue(new ResponseCallback(new WeakReference<>(mLoadingTextView), new WeakReference<>(mChartBatz), new WeakReference<>(mChartAwesomeBags)));
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        mRootLayout.setOrientation(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
+                LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+        mChartBatz.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
+        mChartAwesomeBags.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
+        super.onConfigurationChanged(newConfig);
     }
 
     private class ResponseCallback implements Callback {
@@ -168,14 +181,22 @@ public class MainActivity extends AppCompatActivity {
     private PieChart createChart() {
         PieChart chart = new PieChart(this);
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+        int orientation = getResources().getConfiguration().orientation;
 
-        params.weight = 1;
+        LinearLayout.LayoutParams params = getOrientationBasedLayoutParams(orientation);
+
         chart.setLayoutParams(params);
 
         chart.setVisibility(View.GONE);
 
         return chart;
+    }
+
+    @NonNull
+    private LinearLayout.LayoutParams getOrientationBasedLayoutParams(int orientation) {
+        return new LinearLayout.LayoutParams(
+                orientation == Configuration.ORIENTATION_PORTRAIT ? ViewGroup.LayoutParams.MATCH_PARENT: 0,
+                orientation == Configuration.ORIENTATION_LANDSCAPE? ViewGroup.LayoutParams.MATCH_PARENT: 0, 1);
     }
 
     private void setChartData(PieChart chart, ArrayList<ChartEntry> entries, String dataSetLabel, String centerText) {
