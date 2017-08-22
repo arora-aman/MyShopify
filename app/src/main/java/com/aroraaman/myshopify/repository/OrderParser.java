@@ -1,4 +1,4 @@
-package com.aroraaman.myshopify;
+package com.aroraaman.myshopify.repository;
 
 import com.aroraaman.myshopify.model.Customer;
 import com.aroraaman.myshopify.model.Item;
@@ -10,9 +10,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class OrderParser {
+public class OrderParser implements IOrderParser {
 
-    public static ArrayList<Order> getOrders(String jsonText) throws JSONException {
+    @Override
+    public ArrayList<Order> getOrders(String jsonText) throws JSONException {
         ArrayList<Order> ordersList = new ArrayList<>();
 
         JSONObject jsonObject = new JSONObject(jsonText);

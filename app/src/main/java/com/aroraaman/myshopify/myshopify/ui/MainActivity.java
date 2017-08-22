@@ -14,12 +14,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aroraaman.myshopify.OrderParser;
 import com.aroraaman.myshopify.R;
 import com.aroraaman.myshopify.model.ChartEntry;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
 import com.aroraaman.myshopify.myshopify.MyShopifyApplication;
+import com.aroraaman.myshopify.repository.OrderParser;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<Order> data;
 
                 try {
-                    data = OrderParser.getOrders(jsonString);
+                    data = new OrderParser().getOrders(jsonString);
                 } catch (JSONException e) {
                     Toast.makeText(MainActivity.this, "Invalid response", Toast.LENGTH_LONG).show();
                     return;

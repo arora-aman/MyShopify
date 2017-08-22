@@ -3,7 +3,6 @@ package com.aroraaman.myshopify.repository;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.aroraaman.myshopify.OrderParser;
 import com.aroraaman.myshopify.model.Customer;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
@@ -14,7 +13,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-class OrderStore {
+class OrderStore implements IOrderStore {
     private static final String PREF_NAME = "com.aroraaman.myshopify.repo_orders";
     private static final String KEY_ORDERS_JSON = "KEY_ORDERS_JSON";
 
@@ -33,7 +32,8 @@ class OrderStore {
         mPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    void persistOrders(ArrayList<Order> orders) {
+    @Override
+    public void persistOrders(ArrayList<Order> orders) {
         JSONObject ordersObject = new JSONObject();
         JSONArray ordersArray = new JSONArray();
         try {
@@ -70,14 +70,16 @@ class OrderStore {
         mPrefs.edit().putString(KEY_ORDERS_JSON, ordersObject.toString()).apply();
     }
 
-    ArrayList<Order> getOrders() throws JSONException {
+    @Override
+    public ArrayList<Order> getOrders() throws JSONException {
         String json = mPrefs.getString(KEY_ORDERS_JSON, null);
         ArrayList<Order> orders = new ArrayList<>();
-        orders = OrderParser.getOrders(json);
+        orders = new OrderParser().getOrders(json);
         return orders;
     }
 
-    void clearOrders() {
+    @Override
+    public void clearOrders() {
         mPrefs.edit().remove(KEY_ORDERS_JSON).apply();
     }
 }
