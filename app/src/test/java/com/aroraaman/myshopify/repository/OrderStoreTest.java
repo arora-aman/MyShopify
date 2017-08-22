@@ -11,6 +11,7 @@ import com.aroraaman.myshopify.model.Order;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -18,6 +19,9 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 19, constants = BuildConfig.class)
@@ -27,13 +31,16 @@ public class OrderStoreTest {
     private static final String PREF_NAME = "com.aroraaman.myshopify.repo_orders";
     private static final String KEY_ORDERS_JSON = "KEY_ORDERS_JSON";
 
+    @Mock IOrderParser mOrderParser;
+
     private SharedPreferences mPrefs;
 
     @Before
     public void setUp() throws Exception {
+        initMocks(this);
         mPrefs = RuntimeEnvironment.application.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
 
-        mSut = new OrderStore(RuntimeEnvironment.application);
+        mSut = new OrderStore(RuntimeEnvironment.application, mOrderParser);
     }
 
     @Test
@@ -62,33 +69,32 @@ public class OrderStoreTest {
     }
 
     @Test
-    public void getOrders() throws Exception {
+    public void getOrders_validJsonPersisted_returnsOrdersArray() throws Exception {
         // Arrange
+        ArrayList<Order> orders = new ArrayList<>();
+        when(mOrderParser.getOrders(anyString())).thenReturn(orders);
+
         String ordersJson = "{\"orders\":[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
         mPrefs.edit().putString(KEY_ORDERS_JSON, ordersJson).apply();
 
         // Act
-        ArrayList<Order> orders = mSut.getOrders();
+        ArrayList<Order> result = mSut.getOrders();
 
         // Assert
-        assertThat(mSut.getOrders().size()).isEqualTo(2);
-        assertThat(mSut.getOrders().get(0).customer.firstName).isEqualTo(orders.get(0).customer.firstName);
-        assertThat(mSut.getOrders().get(0).customer.lastName).isEqualTo(orders.get(0).customer.lastName);
-        assertThat(mSut.getOrders().get(0).items.size()).isEqualTo(3);
-        assertThat(mSut.getOrders().get(0).items.get(0).title).isEqualTo(orders.get(0).items.get(0).title);
-        assertThat(mSut.getOrders().get(0).items.get(0).quantity).isEqualTo(orders.get(0).items.get(0).quantity);
-        assertThat(mSut.getOrders().get(0).items.get(1).title).isEqualTo(orders.get(0).items.get(1).title);
-        assertThat(mSut.getOrders().get(0).items.get(1).quantity).isEqualTo(orders.get(0).items.get(1).quantity);
-        assertThat(mSut.getOrders().get(0).items.get(2).title).isEqualTo(orders.get(0).items.get(2).title);
-        assertThat(mSut.getOrders().get(0).items.get(2).quantity).isEqualTo(orders.get(0).items.get(2).quantity);
-        assertThat(mSut.getOrders().get(1).customer.firstName).isEqualTo(orders.get(1).customer.firstName);
-        assertThat(mSut.getOrders().get(1).customer.lastName).isEqualTo(orders.get(1).customer.lastName);
-        assertThat(mSut.getOrders().get(1).items.get(0).title).isEqualTo(orders.get(1).items.get(0).title);
-        assertThat(mSut.getOrders().get(1).items.get(0).quantity).isEqualTo(orders.get(1).items.get(0).quantity);
-        assertThat(mSut.getOrders().get(1).items.get(1).title).isEqualTo(orders.get(1).items.get(1).title);
-        assertThat(mSut.getOrders().get(1).items.get(1).quantity).isEqualTo(orders.get(1).items.get(1).quantity);
-        assertThat(mSut.getOrders().get(1).items.get(2).title).isEqualTo(orders.get(1).items.get(2).title);
-        assertThat(mSut.getOrders().get(1).items.get(2).quantity).isEqualTo(orders.get(1).items.get(2).quantity);
+        assertThat(result).isEqualTo(orders);
+    }
+
+    @Test
+    public void getOrders_invalidJsonPersisted_returnsEmptyList() throws Exception {
+        // Arrange
+        String ordersJson = "{\"orders:[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
+        mPrefs.edit().putString(KEY_ORDERS_JSON, ordersJson).apply();
+
+        // Act
+        ArrayList<Order> result = mSut.getOrders();
+
+        // Assert
+        assertThat(result).isEmpty();
     }
 
     @Test

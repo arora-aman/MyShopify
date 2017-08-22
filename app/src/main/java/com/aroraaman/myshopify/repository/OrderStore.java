@@ -26,10 +26,13 @@ class OrderStore implements IOrderStore {
     private static final String KEY_ITEM_QTY = Item.QUANTITY_KEY;
     private static final String KEY_ORDERS = Order.ORDERS_KEY;
 
+    private final IOrderParser mOrderParser;
+
     private SharedPreferences mPrefs;
 
-    OrderStore(Context context) {
+    OrderStore(Context context, IOrderParser orderParser) {
         mPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        mOrderParser = orderParser;
     }
 
     @Override
@@ -74,7 +77,7 @@ class OrderStore implements IOrderStore {
     public ArrayList<Order> getOrders() throws JSONException {
         String json = mPrefs.getString(KEY_ORDERS_JSON, null);
         ArrayList<Order> orders = new ArrayList<>();
-        orders = new OrderParser().getOrders(json);
+        orders = mOrderParser.getOrders(json);
         return orders;
     }
 

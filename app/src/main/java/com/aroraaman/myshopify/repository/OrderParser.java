@@ -10,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class OrderParser implements IOrderParser {
+class OrderParser implements IOrderParser {
 
     @Override
     public ArrayList<Order> getOrders(String jsonText) throws JSONException {

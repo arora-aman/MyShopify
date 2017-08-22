@@ -19,7 +19,7 @@ import com.aroraaman.myshopify.model.ChartEntry;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
 import com.aroraaman.myshopify.myshopify.MyShopifyApplication;
-import com.aroraaman.myshopify.repository.OrderParser;
+import com.aroraaman.myshopify.repository.IOrderParser;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -40,8 +42,9 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class MainActivity extends AppCompatActivity {
-
     private ActivityComponent mComponent;
+
+    @Inject IOrderParser mOrderParser;
 
     LinearLayout mRootLayout;
     PieChart mChartBatz;
@@ -51,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        component().inject(this);
+
         mRootLayout = new LinearLayout(this);
         mRootLayout.setOrientation(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
                 LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
@@ -190,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<Order> data;
 
                 try {
-                    data = new OrderParser().getOrders(jsonString);
+                    data = mOrderParser.getOrders(jsonString);
                 } catch (JSONException e) {
                     Toast.makeText(MainActivity.this, "Invalid response", Toast.LENGTH_LONG).show();
                     return;

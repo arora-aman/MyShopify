@@ -1,5 +1,8 @@
 package com.aroraaman.myshopify.myshopify;
 
+import com.aroraaman.myshopify.repository.IOrderParser;
+import com.aroraaman.myshopify.repository.RepositoryModule;
+
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -9,8 +12,11 @@ import dagger.Component;
  */
 @Singleton
 @Component(modules = {
-        AppModule.class
+        AppModule.class,
+        RepositoryModule.class
 })
 public interface ApplicationComponent {
     void inject(MyShopifyApplication myShopifyApplication);
+
+    IOrderParser getOrderParser();
 }
