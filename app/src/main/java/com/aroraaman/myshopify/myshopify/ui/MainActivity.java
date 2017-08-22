@@ -1,5 +1,6 @@
-package com.aroraaman.myshopify;
+package com.aroraaman.myshopify.myshopify.ui;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,9 +14,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aroraaman.myshopify.OrderParser;
+import com.aroraaman.myshopify.R;
 import com.aroraaman.myshopify.model.ChartEntry;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
+import com.aroraaman.myshopify.myshopify.MyShopifyApplication;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
@@ -36,6 +40,8 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ActivityComponent mComponent;
 
     LinearLayout mRootLayout;
     PieChart mChartBatz;
@@ -82,6 +88,19 @@ public class MainActivity extends AppCompatActivity {
         mChartBatz.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
         mChartAwesomeBags.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
         super.onConfigurationChanged(newConfig);
+    }
+
+    private ActivityComponent component() {
+        if (mComponent == null) {
+            mComponent = DaggerActivityComponent.builder()
+                    .applicationComponent(MyShopifyApplication.from(this).getComponent())
+                    .build();
+        }
+        return mComponent;
+    }
+
+    public static ActivityComponent getComponent(Context context) {
+        return ((MainActivity) context).component();
     }
 
     private PieChart createChart() {
