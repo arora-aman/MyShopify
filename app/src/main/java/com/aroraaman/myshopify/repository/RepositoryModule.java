@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.OkHttpClient;
 
 @Module
 public class RepositoryModule {
@@ -21,5 +22,11 @@ public class RepositoryModule {
     @Provides
     IOrderParser providesOrderParser() {
         return new OrderParser();
+    }
+
+    @Singleton
+    @Provides
+    IShopifyRepository providesShopifyRepository(IOrderStore orderStore, IOrderParser orderParser) {
+        return new ShopifyRepository(orderStore, orderParser, new OkHttpClient());
     }
 }
