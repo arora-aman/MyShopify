@@ -1,12 +1,11 @@
 <resources>
     <string name="app_name">MyShopify</string>
-    <string name="nap_batz">Napoleon Batz</string>
-    <string name="nap_batz_label">Napoleon Batz spent $%.2f.</string>
-    <string name="awesome_bronze_bags">Awesome Bronze Bags</string>
-    <string name="awesome_bronze_bag_label">Number of Awesome Bronze Bag sold = %d.</string>
+    <string name="customer_expenditure_label">%s spent $%.2f.</string>
+    <string name="items_sold_label">Number of %s(s) sold = %d.</string>
     <string name="others">Others</string>
     <string name="fetching_data">Fetching data</string>
     <string name="crunching_numbers">Crunching numbers</string>
     <string name="customer_expenditure">Customer expenditure</string>
     <string name="items_sold">Items sold</string>
+    <string name="request_failed_error">Failed to get data.\nPlease check your internet connection.</string>
 </resources>

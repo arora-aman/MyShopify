@@ -1,12 +1,15 @@
 package com.aroraaman.myshopify.myshopify.ui;
 
+import android.arch.lifecycle.LifecycleActivity;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,38 +19,30 @@ import android.widget.Toast;
 
 import com.aroraaman.myshopify.R;
 import com.aroraaman.myshopify.model.ChartEntry;
-import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
 import com.aroraaman.myshopify.myshopify.MyShopifyApplication;
-import com.aroraaman.myshopify.repository.IOrderParser;
+import com.aroraaman.myshopify.repository.ResourceWrapper;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends LifecycleActivity {
     private ActivityComponent mComponent;
 
-    @Inject IOrderParser mOrderParser;
+    @Inject ViewModelProvider.Factory mFactory;
 
-    LinearLayout mRootLayout;
-    PieChart mChartBatz;
-    PieChart mChartAwesomeBags;
-    TextView mLoadingTextView;
+    private OrdersViewModel mViewModel;
+
+    private LinearLayout mRootLayout;
+    private PieChart mChartExpenditure;
+    private PieChart mChartItemsSold;
+    private TextView mLoadingTextView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
         mRootLayout.setLayoutParams(params);
         mRootLayout.setPadding(10, 0, 10, 0);
 
-        mChartBatz = createChart();
-        mChartAwesomeBags = createChart();
+        mChartExpenditure = createChart();
+        mChartItemsSold = createChart();
 
         mLoadingTextView = new TextView(this);
         mLoadingTextView.setLayoutParams(params);
@@ -72,25 +67,22 @@ public class MainActivity extends AppCompatActivity {
         mLoadingTextView.setText(R.string.fetching_data);
 
         mRootLayout.addView(mLoadingTextView);
-        mRootLayout.addView(mChartBatz);
-        mRootLayout.addView(mChartAwesomeBags);
+        mRootLayout.addView(mChartExpenditure);
+        mRootLayout.addView(mChartItemsSold);
 
         setContentView(mRootLayout);
 
-        OkHttpClient httpClient = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url("https://shopicruit.myshopify.com/admin/orders.json?page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6")
-                .build();
-
-        httpClient.newCall(request).enqueue(new ResponseCallback(new WeakReference<>(mLoadingTextView), new WeakReference<>(mChartBatz), new WeakReference<>(mChartAwesomeBags)));
+        mViewModel = ViewModelProviders.of(this, mFactory).get(OrdersViewModel.class);
+        mViewModel.getOrders("https://shopicruit.myshopify.com/admin/orders.json?page=1&access_token=c32313df0d0ef512ca64d5b336a0d7c6")
+                .observe(this, new OrderObserver());
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mRootLayout.setOrientation(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ?
                 LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
-        mChartBatz.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
-        mChartAwesomeBags.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
+        mChartExpenditure.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
+        mChartItemsSold.setLayoutParams(getOrientationBasedLayoutParams(newConfig.orientation));
         super.onConfigurationChanged(newConfig);
     }
 
@@ -137,16 +129,22 @@ public class MainActivity extends AppCompatActivity {
         PieDataSet dataSet = new PieDataSet(pieEntries, dataSetLabel);
         dataSet.setColors(colors);
 
-        PieData data = new PieData(dataSet);
+        PieData data = chart.getData();
+        if (data == null) {
+            data = new PieData(dataSet);
+        } else {
+            data.setDataSet(dataSet);
+        }
         data.setValueTextSize(0f);
         chart.setData(data);
-
         chart.setCenterText(centerText);
         chart.setCenterTextSize(12);
         chart.setCenterTextOffset(0, 10);
 
         chart.getDescription().setEnabled(false);
         chart.setDrawEntryLabels(false);
+
+        chart.notifyDataSetChanged();
         chart.invalidate();
 
         chart.setVisibility(View.VISIBLE);
@@ -159,95 +157,51 @@ public class MainActivity extends AppCompatActivity {
                 orientation == Configuration.ORIENTATION_LANDSCAPE? ViewGroup.LayoutParams.MATCH_PARENT: 0, 1);
     }
 
-    private class ResponseCallback implements Callback {
-
-        final WeakReference<TextView> loadingTextView;
-        final WeakReference<PieChart> weakChartBatz, weakPieChartAwesomeBags;
-
-        private ResponseCallback(WeakReference<TextView> loadingTextView, WeakReference<PieChart> weakChartBatz, WeakReference<PieChart> weakPieChartAwesomeBags) {
-            this.loadingTextView = loadingTextView;
-            this.weakChartBatz = weakChartBatz;
-            this.weakPieChartAwesomeBags = weakPieChartAwesomeBags;
-        }
-
+    private class OrderObserver implements Observer<ResourceWrapper<ArrayList<Order>>> {
         @Override
-        public void onResponse(Call call, Response response) throws IOException {
-            if (response.isSuccessful()) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loadingTextView.get().setText(R.string.crunching_numbers);
-                    }
-                });
-                double batzExpenditure = 0;
-                double othersExpenditure = 0;
-                int awesomeBagsSold = 0;
-                int otherItemsSold = 0;
-
-                ResponseBody body = response.body();
-                if (body == null) {
-                    Toast.makeText(MainActivity.this, "Response body is empty", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                String jsonString = body.string();
-
-                ArrayList<Order> data = mOrderParser.getOrders(jsonString);
-
-                if (data == null) {
-                    Toast.makeText(MainActivity.this, "Invalid response", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                for (Order order : data) {
-                    if (order.customer != null && "Napoleon".equals(order.customer.firstName) && "Batz".equals(order.customer.lastName)) {
-                        batzExpenditure += order.totalPrice;
-                    } else {
-                        othersExpenditure += order.totalPrice;
-                    }
-                    for (Item item : order.items) {
-                        if ("Awesome Bronze Bag".equals(item.title)) {
-                            awesomeBagsSold += item.quantity;
-                        } else {
-                            otherItemsSold += item.quantity;
-                        }
-                    }
-                }
-
-                final ArrayList<ChartEntry> batzPieEntries = new ArrayList<>();
-                batzPieEntries.add(new ChartEntry(getString(R.string.nap_batz),
-                        (float) batzExpenditure, Color.rgb(39, 111, 191)));
-                batzPieEntries.add(new ChartEntry(getString(R.string.others),
-                        (float) othersExpenditure, Color.rgb(175, 91, 91)));
-
-
-                final ArrayList<ChartEntry> awesomeBagPieEntries = new ArrayList<>();
-                awesomeBagPieEntries.add(new ChartEntry(getString(R.string.awesome_bronze_bags),
-                        (float) awesomeBagsSold, Color.rgb(240, 58, 71)));
-                awesomeBagPieEntries.add(new ChartEntry(getString(R.string.others),
-                        (float) otherItemsSold, Color.rgb(175, 91, 91)));
-
-
-                final String napBatzLabel = getString(R.string.nap_batz_label, batzExpenditure);
-                final String awesomeBagLabel = getString(R.string.awesome_bronze_bag_label, awesomeBagsSold);
-
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setChartData(weakChartBatz.get(), batzPieEntries, getString(R.string.customer_expenditure), napBatzLabel);
-                        setChartData(weakPieChartAwesomeBags.get(), awesomeBagPieEntries, getString(R.string.items_sold), awesomeBagLabel);
-                        loadingTextView.get().setVisibility(View.GONE);
-                    }
-                });
-
-            } else {
-                Toast.makeText(MainActivity.this, "Response failed", Toast.LENGTH_LONG).show();
+        public void onChanged(@Nullable ResourceWrapper<ArrayList<Order>> orders) {
+            if (orders == null) {
+                mLoadingTextView.setVisibility(View.VISIBLE);
+                mLoadingTextView.setText(R.string.fetching_data);
+                return;
             }
+            ResourceWrapper.State state = orders.state;
+            if (state == ResourceWrapper.State.REQUEST_FAILED) {
+                Toast.makeText(MainActivity.this, R.string.request_failed_error , Toast.LENGTH_SHORT)
+                        .show();
+                return;
+            } else if (state == ResourceWrapper.State.ERROR) {
+                Toast.makeText(MainActivity.this, orders.error.getMessage() , Toast.LENGTH_SHORT)
+                        .show();
+                return;
+            } else if (state == ResourceWrapper.State.LOADING && orders.data == null) {
+                return;
+            }
+
+            mLoadingTextView.setText(R.string.crunching_numbers);
+
+            final OrdersViewModel.Data<Double> customerExpenditureData = mViewModel.amountSpentProcessor(orders.data, "Napoleon", "Batz");
+            final OrdersViewModel.Data<Integer> itemsSoldData = mViewModel.quantityProcessor(orders.data, "Awesome Bronze Bag");
+
+            setChartData(mChartExpenditure, createPieChartEntries(customerExpenditureData),
+                    getString(R.string.customer_expenditure),
+                    getString(R.string.customer_expenditure_label, customerExpenditureData.reqdParameter, customerExpenditureData.requiredValue));
+            setChartData(mChartItemsSold, createPieChartEntries(itemsSoldData),
+                    getString(R.string.items_sold),
+                    getString(R.string.items_sold_label, itemsSoldData.reqdParameter, itemsSoldData.requiredValue));
+
+            mLoadingTextView.setVisibility(View.GONE);
         }
 
-        @Override
-        public void onFailure(Call call, IOException e) {
-            Toast.makeText(MainActivity.this, "Failed to make request", Toast.LENGTH_LONG).show();
+        <T extends Number> ArrayList<ChartEntry> createPieChartEntries(OrdersViewModel.Data<T> data) {
+            ArrayList<ChartEntry> pieEntries = new ArrayList<>();
+
+            pieEntries.add(new ChartEntry(data.reqdParameter,
+                    data.requiredValue.floatValue(), Color.rgb(39, 111, 191)));
+            pieEntries.add(new ChartEntry(getString(R.string.others),
+                    data.othersValue.floatValue(), Color.rgb(175, 91, 91)));
+
+            return pieEntries;
         }
     }
 }

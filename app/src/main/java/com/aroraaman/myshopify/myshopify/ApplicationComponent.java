@@ -1,6 +1,7 @@
 package com.aroraaman.myshopify.myshopify;
 
-import com.aroraaman.myshopify.repository.IOrderParser;
+import android.arch.lifecycle.ViewModelProvider;
+
 import com.aroraaman.myshopify.repository.RepositoryModule;
 import com.aroraaman.myshopify.viewmodel.ViewModelModule;
 
@@ -20,5 +21,5 @@ import dagger.Component;
 public interface ApplicationComponent {
     void inject(MyShopifyApplication myShopifyApplication);
 
-    IOrderParser getOrderParser();
+    ViewModelProvider.Factory getViewModelFactory();
 }
