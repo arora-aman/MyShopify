@@ -74,11 +74,9 @@ class OrderStore implements IOrderStore {
     }
 
     @Override
-    public ArrayList<Order> getOrders() throws JSONException {
+    public ArrayList<Order> getOrders() {
         String json = mPrefs.getString(KEY_ORDERS_JSON, null);
-        ArrayList<Order> orders = new ArrayList<>();
-        orders = mOrderParser.getOrders(json);
-        return orders;
+        return mOrderParser.getOrders(json);
     }
 
     @Override

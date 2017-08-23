@@ -87,14 +87,16 @@ public class OrderStoreTest {
     @Test
     public void getOrders_invalidJsonPersisted_returnsEmptyList() throws Exception {
         // Arrange
-        String ordersJson = "{\"orders:[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
+        String ordersJson = "{\"orders\"[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
+        when(mOrderParser.getOrders(anyString())).thenReturn(null);
+
         mPrefs.edit().putString(KEY_ORDERS_JSON, ordersJson).apply();
 
         // Act
         ArrayList<Order> result = mSut.getOrders();
 
         // Assert
-        assertThat(result).isEmpty();
+        assertThat(result).isNull();
     }
 
     @Test

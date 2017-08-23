@@ -2,8 +2,6 @@ package com.aroraaman.myshopify.repository;
 
 import com.aroraaman.myshopify.model.Order;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 
 interface IOrderStore {
@@ -14,12 +12,9 @@ interface IOrderStore {
     void persistOrders(ArrayList<Order> orders);
 
     /**
-     * @return List of orders that was stored in SharedPreferences.
-     *
-     * @throws JSONException if the data stored in SharedPreferences can't be
-     *                       parsed as a list of orders.
+     * @return List of orders if json stored(for orders) in SharedPreferences is valid else null.
      */
-    ArrayList<Order> getOrders() throws JSONException;
+    ArrayList<Order> getOrders();
 
     /**
      * Clears all orders stored in SharedPreferences.

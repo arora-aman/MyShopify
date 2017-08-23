@@ -26,8 +26,6 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -193,11 +191,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 String jsonString = body.string();
 
-                ArrayList<Order> data;
+                ArrayList<Order> data = mOrderParser.getOrders(jsonString);
 
-                try {
-                    data = mOrderParser.getOrders(jsonString);
-                } catch (JSONException e) {
+                if (data == null) {
                     Toast.makeText(MainActivity.this, "Invalid response", Toast.LENGTH_LONG).show();
                     return;
                 }
