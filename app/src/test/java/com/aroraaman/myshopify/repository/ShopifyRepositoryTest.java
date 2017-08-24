@@ -1,6 +1,7 @@
 package com.aroraaman.myshopify.repository;
 
 import android.arch.lifecycle.LiveData;
+import android.os.Handler;
 
 import com.aroraaman.myshopify.BuildConfig;
 import com.aroraaman.myshopify.model.Order;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -38,6 +40,7 @@ public class ShopifyRepositoryTest {
     @Mock IOrderParser mOrderParser;
     @Mock IOrderStore mOrderStore;
     @Mock OkHttpClient mClient;
+    @Mock Handler mHandler;
     @Mock OrdersCall mCall;
 
     private static final String TEST_URL = "https://www.shopify.com/";
@@ -49,7 +52,7 @@ public class ShopifyRepositoryTest {
         initMocks(this);
         when(mClient.newCall(any(Request.class))).thenReturn(mCall);
 
-        mSut = new ShopifyRepository(mOrderStore,mOrderParser, mClient);
+        mSut = new ShopifyRepository(mOrderStore,mOrderParser, mClient, mHandler);
 
         mOrders = new ArrayList<>();
     }
@@ -84,9 +87,10 @@ public class ShopifyRepositoryTest {
         when(mOrderStore.getOrders()).thenReturn(null);
 
         // Act
-        LiveData<ResourceWrapper<ArrayList<Order>>> result = mSut.getOrders (TEST_URL);
+        LiveData<ResourceWrapper<ArrayList<Order>>> result = mSut.getOrders(TEST_URL);
 
         // Assert
+        getHandlerRunnable(1).run();
         ResourceWrapper<ArrayList<Order>> orders = result.getValue();
         assertThat(orders).isNotNull();
         assertThat(orders.state).isEqualTo(ResourceWrapper.State.LOADING);
@@ -100,9 +104,10 @@ public class ShopifyRepositoryTest {
         when(mOrderStore.getOrders()).thenReturn(mOrders);
 
         // Act
-        LiveData<ResourceWrapper<ArrayList<Order>>> result = mSut.getOrders (TEST_URL);
+        LiveData<ResourceWrapper<ArrayList<Order>>> result = mSut.getOrders(TEST_URL);
 
         // Assert
+        getHandlerRunnable(1).run();
         ResourceWrapper<ArrayList<Order>> orders = result.getValue();
         assertThat(orders).isNotNull();
         assertThat(orders.state).isEqualTo(ResourceWrapper.State.LOADING);
@@ -121,6 +126,7 @@ public class ShopifyRepositoryTest {
         getRequestCallback().onResponse(mCall, response);
 
         // Assert
+        getHandlerRunnable(2).run();
         ResourceWrapper wrappedOrders = data.getValue();
         assertThat(wrappedOrders).isNotNull();
         assertThat(wrappedOrders.state).isEqualTo(ResourceWrapper.State.ERROR);
@@ -143,6 +149,7 @@ public class ShopifyRepositoryTest {
         getRequestCallback().onResponse(mCall, response);
 
         // Assert
+        getHandlerRunnable(2).run();
         ResourceWrapper wrappedOrders = data.getValue();
         assertThat(wrappedOrders).isNotNull();
         assertThat(wrappedOrders.state).isEqualTo(ResourceWrapper.State.ERROR);
@@ -169,6 +176,7 @@ public class ShopifyRepositoryTest {
         // Assert
         verify(mOrderStore).persistOrders(expectedOrders);
 
+        getHandlerRunnable(2).run();
         ResourceWrapper wrappedOrders = data.getValue();
         assertThat(wrappedOrders).isNotNull();
         assertThat(wrappedOrders.state).isEqualTo(ResourceWrapper.State.SUCCESS);
@@ -187,6 +195,7 @@ public class ShopifyRepositoryTest {
         getRequestCallback().onResponse(mCall, response);
 
         // Assert
+        getHandlerRunnable(2).run();
         ResourceWrapper wrappedOrders = data.getValue();
         assertThat(wrappedOrders).isNotNull();
         assertThat(wrappedOrders.state).isEqualTo(ResourceWrapper.State.ERROR);
@@ -203,6 +212,7 @@ public class ShopifyRepositoryTest {
         getRequestCallback().onFailure(mCall, new IOException());
 
         // Assert
+        getHandlerRunnable(2).run();
         ResourceWrapper wrappedOrders = data.getValue();
         assertThat(wrappedOrders).isNotNull();
         assertThat(wrappedOrders.state).isEqualTo(ResourceWrapper.State.REQUEST_FAILED);
@@ -218,6 +228,12 @@ public class ShopifyRepositoryTest {
                 .body(body)
                 .message("TEST MESSAGE")
                 .build();
+    }
+
+    private Runnable getHandlerRunnable(int times) {
+        ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+        verify(mHandler, Mockito.times(times)).post(captor.capture());
+        return captor.getValue();
     }
 
     private Request getRequest() {

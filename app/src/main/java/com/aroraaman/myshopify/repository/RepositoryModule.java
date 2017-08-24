@@ -1,6 +1,8 @@
 package com.aroraaman.myshopify.repository;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.aroraaman.myshopify.dagger.ForApplication;
 
@@ -27,6 +29,7 @@ public class RepositoryModule {
     @Singleton
     @Provides
     IShopifyRepository providesShopifyRepository(IOrderStore orderStore, IOrderParser orderParser) {
-        return new ShopifyRepository(orderStore, orderParser, new OkHttpClient());
+        return new ShopifyRepository(orderStore, orderParser,
+                new OkHttpClient(), new Handler(Looper.getMainLooper()));
     }
 }

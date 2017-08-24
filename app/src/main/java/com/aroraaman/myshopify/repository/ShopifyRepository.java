@@ -2,6 +2,7 @@ package com.aroraaman.myshopify.repository;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
+import android.os.Handler;
 
 import com.aroraaman.myshopify.model.Order;
 
@@ -19,13 +20,18 @@ class ShopifyRepository implements IShopifyRepository{
     private final IOrderStore mOrderStore;
     private final IOrderParser mOrderParser;
     private final OkHttpClient mClient;
+    private final Handler mMainThreadHandler;
 
     private boolean isMakingCall;
 
-    ShopifyRepository(IOrderStore orderStore, IOrderParser orderParser, OkHttpClient client) {
+    ShopifyRepository(IOrderStore orderStore,
+                      IOrderParser orderParser,
+                      OkHttpClient client,
+                      Handler handler) {
         this.mOrderStore = orderStore;
         this.mOrderParser = orderParser;
         this.mClient = client;
+        mMainThreadHandler = handler;
     }
 
     @Override
@@ -42,8 +48,17 @@ class ShopifyRepository implements IShopifyRepository{
 
         ArrayList<Order> orders = mOrderStore.getOrders();
 
-        data.postValue(ResourceWrapper.loading(orders));
+        setValue(data, ResourceWrapper.loading(orders));
         return data;
+    }
+
+    private <T> void setValue(final MutableLiveData<ResourceWrapper<T>> data, final ResourceWrapper<T> value) {
+        mMainThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                data.setValue(value);
+            }
+        });
     }
 
     private class RequestCallback implements Callback {
@@ -60,28 +75,28 @@ class ShopifyRepository implements IShopifyRepository{
             if (response.isSuccessful()) {
                 ResponseBody body = response.body();
                 if (body == null) {
-                    mData.postValue(ResourceWrapper.<ArrayList<Order>>error(new Throwable("No orders found")));
+                    setValue(mData, ResourceWrapper.<ArrayList<Order>>error(new Throwable("No orders found")));
                     return;
                 }
                 String responseString = body.string();
 
                 ArrayList<Order> orders = mOrderParser.fromJson(responseString);
                 if (orders == null) {
-                    mData.postValue(ResourceWrapper.<ArrayList<Order>>error(new Throwable("Invalid response received")));
+                    setValue(mData, ResourceWrapper.<ArrayList<Order>>error(new Throwable("Invalid response received")));
                     return;
                 }
 
                 mOrderStore.persistOrders(orders);
-                mData.postValue(ResourceWrapper.success(orders));
+                setValue(mData, ResourceWrapper.success(orders));
             } else {
-                mData.postValue(ResourceWrapper.<ArrayList<Order>>error(new Throwable("An error occurred")));
+                setValue(mData, ResourceWrapper.<ArrayList<Order>>error(new Throwable("An error occurred")));
             }
         }
 
         @Override
         public void onFailure(Call call, IOException e) {
             isMakingCall = false;
-            mData.postValue(ResourceWrapper.<ArrayList<Order>>failed(null));
+            setValue(mData, ResourceWrapper.<ArrayList<Order>>failed(null));
         }
     }
 }
