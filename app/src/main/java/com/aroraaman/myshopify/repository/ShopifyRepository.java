@@ -65,7 +65,7 @@ class ShopifyRepository implements IShopifyRepository{
                 }
                 String responseString = body.string();
 
-                ArrayList<Order> orders = mOrderParser.getOrders(responseString);
+                ArrayList<Order> orders = mOrderParser.fromJson(responseString);
                 if (orders == null) {
                     mData.postValue(ResourceWrapper.<ArrayList<Order>>error(new Throwable("Invalid response received")));
                     return;

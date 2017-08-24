@@ -137,7 +137,7 @@ public class ShopifyRepositoryTest {
         ResponseBody body = ResponseBody.create(null, content);
         Response response = createResponse(200, body);
 
-        when(mOrderParser.getOrders(content)).thenReturn(null);
+        when(mOrderParser.fromJson(content)).thenReturn(null);
 
         // Act
         getRequestCallback().onResponse(mCall, response);
@@ -161,7 +161,7 @@ public class ShopifyRepositoryTest {
 
         ArrayList<Order> expectedOrders = new ArrayList<>();
 
-        when(mOrderParser.getOrders(content)).thenReturn(expectedOrders);
+        when(mOrderParser.fromJson(content)).thenReturn(expectedOrders);
 
         // Act
         getRequestCallback().onResponse(mCall, response);

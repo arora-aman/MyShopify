@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.aroraaman.myshopify.BuildConfig;
-import com.aroraaman.myshopify.model.Customer;
-import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
 
 import org.junit.Before;
@@ -46,20 +44,10 @@ public class OrderStoreTest {
     @Test
     public void persistOrders() throws Exception {
         // Arrange
-        Item item = new Item("title", 1);
-        ArrayList<Item> items = new ArrayList<>();
-        items.add(item);
-        items.add(item);
-        items.add(item);
-
-        Customer customer = new Customer("firstName", "lastName");
-
-        Order order = new Order(customer, items, 1.1);
         ArrayList<Order> orders = new ArrayList<>();
-        orders.add(order);
-        orders.add(order);
+        String expectedJsonString = "{\"orders\":[]}";
 
-        String expectedJsonString = "{\"orders\":[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
+        when(mOrderParser.toJson(orders)).thenReturn(expectedJsonString);
 
         // Act
         mSut.persistOrders(orders);
@@ -72,7 +60,7 @@ public class OrderStoreTest {
     public void getOrders_validJsonPersisted_returnsOrdersArray() throws Exception {
         // Arrange
         ArrayList<Order> orders = new ArrayList<>();
-        when(mOrderParser.getOrders(anyString())).thenReturn(orders);
+        when(mOrderParser.fromJson(anyString())).thenReturn(orders);
 
         String ordersJson = "{\"orders\":[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
         mPrefs.edit().putString(KEY_ORDERS_JSON, ordersJson).apply();
@@ -88,7 +76,7 @@ public class OrderStoreTest {
     public void getOrders_invalidJsonPersisted_returnsEmptyList() throws Exception {
         // Arrange
         String ordersJson = "{\"orders\"[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
-        when(mOrderParser.getOrders(anyString())).thenReturn(null);
+        when(mOrderParser.fromJson(anyString())).thenReturn(null);
 
         mPrefs.edit().putString(KEY_ORDERS_JSON, ordersJson).apply();
 

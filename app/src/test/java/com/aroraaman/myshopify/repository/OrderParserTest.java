@@ -26,30 +26,30 @@ public class OrderParserTest {
     }
 
     @Test
-    public void getOrders_nullString_returnsNull() throws Exception {
+    public void fromJson_nullString_returnsNull() throws Exception {
         // Arrange
 
         // Act
-        ArrayList<Order> result = mSut.getOrders(null);
+        ArrayList<Order> result = mSut.fromJson(null);
 
         // Assert
         assertThat(result).isNull();
     }
 
     @Test
-    public void getOrders_invalidJson_returnsNull() throws Exception {
+    public void fromJson_invalidJson_returnsNull() throws Exception {
         // Arrange
         String jsonString = "{\"orders\"{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
 
         // Act
-        ArrayList<Order> result = mSut.getOrders(jsonString);
+        ArrayList<Order> result = mSut.fromJson(jsonString);
 
         // Assert
         assertThat(result).isNull();
     }
 
     @Test
-    public void getOrders_validJson_returnsOrdersList() throws Exception {
+    public void fromJson_validJson_returnsOrdersList() throws Exception {
         // Arrange
         Item item = new Item("title", 1);
         ArrayList<Item> items = new ArrayList<>();
@@ -67,7 +67,7 @@ public class OrderParserTest {
         String jsonString = "{\"orders\":[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"billing_address\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
 
         // Act
-        ArrayList<Order> result = mSut.getOrders(jsonString);
+        ArrayList<Order> result = mSut.fromJson(jsonString);
 
         // Assert
         assertThat(result.size()).isEqualTo(2);
@@ -88,5 +88,41 @@ public class OrderParserTest {
         assertThat(result.get(1).items.get(1).quantity).isEqualTo(orders.get(1).items.get(1).quantity);
         assertThat(result.get(1).items.get(2).title).isEqualTo(orders.get(1).items.get(2).title);
         assertThat(result.get(1).items.get(2).quantity).isEqualTo(orders.get(1).items.get(2).quantity);
+    }
+
+    @Test
+    public void toJson_nullOrders_returnsNull()throws Exception {
+        // Arrange
+
+        // Act
+        String result = mSut.toJson(null);
+
+        // Assert
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void toJson_validOrdersList_returnsValidJson() throws Exception {
+        // Arrange
+        Item item = new Item("title", 1);
+        ArrayList<Item> items = new ArrayList<>();
+        items.add(item);
+        items.add(item);
+        items.add(item);
+
+        Customer customer = new Customer("firstName", "lastName");
+
+        Order order = new Order(customer, items, 1.1);
+        ArrayList<Order> orders = new ArrayList<>();
+        orders.add(order);
+        orders.add(order);
+
+        String expectedJsonString = "{\"orders\":[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
+
+        // Act
+        String result = mSut.toJson(orders);
+
+        // Assert
+        assertThat(result).isEqualToIgnoringWhitespace(expectedJsonString);
     }
 }
