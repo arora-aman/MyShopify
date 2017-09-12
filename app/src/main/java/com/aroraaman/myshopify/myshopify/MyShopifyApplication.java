@@ -2,8 +2,8 @@ package com.aroraaman.myshopify.myshopify;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.annotation.NonNull;
 
-import org.jetbrains.annotations.NotNull;
 
 public class MyShopifyApplication extends Application {
     private ApplicationComponent mApplicationComponent;
@@ -25,7 +25,7 @@ public class MyShopifyApplication extends Application {
      * @param context Source context.
      * @return Application component instance.
      */
-    public static ApplicationComponent getComponent(@NotNull Context context) {
+    public static ApplicationComponent getComponent(@NonNull Context context) {
         return from(context).getComponent();
     }
 
@@ -34,7 +34,7 @@ public class MyShopifyApplication extends Application {
      * @param context Source context.
      * @return Application instance.
      */
-    public static MyShopifyApplication from(@NotNull Context context) {
+    public static MyShopifyApplication from(@NonNull Context context) {
         return (MyShopifyApplication) context.getApplicationContext();
     }
 

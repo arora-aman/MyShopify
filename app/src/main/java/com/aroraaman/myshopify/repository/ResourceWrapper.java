@@ -1,7 +1,7 @@
 package com.aroraaman.myshopify.repository;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 public class ResourceWrapper<T> {
     public enum State {
@@ -11,11 +11,11 @@ public class ResourceWrapper<T> {
         REQUEST_FAILED;
     }
 
-    @NotNull public final State state;
+    @NonNull public final State state;
     @Nullable public final T data;
     @Nullable public final Throwable error;
 
-    private ResourceWrapper(@NotNull State state, @Nullable T data, @Nullable Throwable error) {
+    private ResourceWrapper(@NonNull State state, @Nullable T data, @Nullable Throwable error) {
         this.state = state;
         this.data = data;
         this.error = error;
@@ -29,7 +29,7 @@ public class ResourceWrapper<T> {
         return new ResourceWrapper<>(State.SUCCESS, data, null);
     }
 
-    static <T> ResourceWrapper<T> error(@NotNull Throwable t) {
+    static <T> ResourceWrapper<T> error(@NonNull Throwable t) {
         return new ResourceWrapper<>(State.ERROR, null, t);
     }
 
