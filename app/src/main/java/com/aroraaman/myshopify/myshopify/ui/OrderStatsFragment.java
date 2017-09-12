@@ -5,7 +5,6 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -126,6 +125,7 @@ public class OrderStatsFragment extends LifecycleFragment {
         chart.setData(data);
         chart.setCenterText(centerText);
         chart.setCenterTextSize(12);
+        chart.setCenterTextColor(R.color.text_color);
         chart.setCenterTextOffset(0, 10);
 
         chart.getDescription().setEnabled(false);
@@ -184,9 +184,9 @@ public class OrderStatsFragment extends LifecycleFragment {
             ArrayList<ChartEntry> pieEntries = new ArrayList<>();
 
             pieEntries.add(new ChartEntry(data.reqdParameter,
-                    data.requiredValue.floatValue(), Color.rgb(39, 111, 191)));
+                    data.requiredValue.floatValue(), getResources().getColor(R.color.piePrimary)));
             pieEntries.add(new ChartEntry(getString(R.string.others),
-                    data.othersValue.floatValue(), Color.rgb(175, 91, 91)));
+                    data.othersValue.floatValue(), getResources().getColor(R.color.pieSecondary)));
 
             return pieEntries;
         }

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#43467F</color>
+    <color name="colorPrimaryDark">#1C2260</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="piePrimary">#50248F</color>
+    <color name="pieSecondary">#E3D0FF</color>
+    <color name="text_color">#3E4155</color>
 </resources>
