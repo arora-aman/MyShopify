@@ -172,10 +172,10 @@ public class OrderStatsFragment extends Fragment {
 
             setChartData(mChartExpenditure, createPieChartEntries(customerExpenditureData),
                     getString(R.string.customer_expenditure),
-                    getString(R.string.customer_expenditure_label, customerExpenditureData.reqdParameter, customerExpenditureData.requiredValue));
+                    getString(R.string.customer_expenditure_label, customerExpenditureData.getReqdParameter(), customerExpenditureData.getRequiredValue()));
             setChartData(mChartItemsSold, createPieChartEntries(itemsSoldData),
                     getString(R.string.items_sold),
-                    getString(R.string.items_sold_label, itemsSoldData.reqdParameter, itemsSoldData.requiredValue));
+                    getString(R.string.items_sold_label, itemsSoldData.getReqdParameter(), itemsSoldData.getRequiredValue()));
 
             mLoadingTextView.setVisibility(View.GONE);
         }
@@ -183,10 +183,10 @@ public class OrderStatsFragment extends Fragment {
         <T extends Number> ArrayList<ChartEntry> createPieChartEntries(OrdersViewModel.Data<T> data) {
             ArrayList<ChartEntry> pieEntries = new ArrayList<>();
 
-            pieEntries.add(new ChartEntry(data.reqdParameter,
-                    data.requiredValue.floatValue(), getResources().getColor(R.color.piePrimary)));
+            pieEntries.add(new ChartEntry(data.getReqdParameter(),
+                    data.getRequiredValue().floatValue(), getResources().getColor(R.color.piePrimary)));
             pieEntries.add(new ChartEntry(getString(R.string.others),
-                    data.othersValue.floatValue(), getResources().getColor(R.color.pieSecondary)));
+                    data.getOthersValue().floatValue(), getResources().getColor(R.color.pieSecondary)));
 
             return pieEntries;
         }
