@@ -3,6 +3,7 @@ package com.aroraaman.myshopify.myshopify.ui;
 import com.aroraaman.myshopify.model.Customer;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
+import com.aroraaman.myshopify.model.Province;
 import com.aroraaman.myshopify.repository.IShopifyRepository;
 
 import org.junit.Before;
@@ -103,11 +104,13 @@ public class OrdersViewModelTest {
         items.add(item);
 
         ArrayList<Order> orders = new ArrayList<>();
-        Customer customer = new Customer("firstName", "lastName");
-        Order order = new Order(customer, items, 12.1);
+        Customer customer = new Customer("firstName", "lastName", new Province("CO", "Colorado"));
+        String createdAt = "2016-12-05T23:04:52-05:00";
+
+        Order order = new Order(customer, items, 12.1, createdAt);
         orders.add(order);
-        customer = new Customer("first_name", "last_name");
-        order = new Order(customer, items, 1.1);
+        customer = new Customer("first_name", "last_name", new Province("CA", "California"));
+        order = new Order(customer, items, 1.1, createdAt);
         orders.add(order);
 
         return orders;

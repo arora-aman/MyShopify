@@ -4,6 +4,7 @@ import com.aroraaman.myshopify.BuildConfig;
 import com.aroraaman.myshopify.model.Customer;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
+import com.aroraaman.myshopify.model.Province;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,37 +58,89 @@ public class OrderParserTest {
         items.add(item);
         items.add(item);
 
-        Customer customer = new Customer("firstName", "lastName");
-
-        Order order = new Order(customer, items, 1.1);
+        Customer customer = new Customer("firstName", "lastName", new Province("CO", "Colorado"));
+        Customer billingAddressCustomer = new Customer("billingAddressFirstName", "billingAddressLastName", new Province("CA", "California"));
+        String createdAt = "2016-12-05T23:04:52-05:00";
+        Order order1 = new Order(customer, items, 1.1, createdAt);
+        Order order2 = new Order(billingAddressCustomer, items, 1.1, createdAt);
         ArrayList<Order> orders = new ArrayList<>();
-        orders.add(order);
-        orders.add(order);
+        orders.add(order1);
+        orders.add(order2);
         
-        String jsonString = "{\"orders\":[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"billing_address\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
+        String jsonString =
+                "{\"orders\":[" +
+                "{" +
+                    "\"total_price\":1.1," +
+                    "\"created_at\":\"" + createdAt + "\"," +
+                    "\"line_items\":[" +
+                    "{" +
+                        "\"fulfillable_quantity\":1," +
+                        "\"title\":\"title\"" +
+                    "}," +
+                    "{" +
+                        "\"fulfillable_quantity\":1," +
+                        "\"title\":\"title\"" +
+                    "}," +
+                    "{" +
+                        "\"fulfillable_quantity\":1," +
+                        "\"title\":\"title\"" +
+                    "}]," +
+                    "\"customer\":{" +
+                        "\"last_name\":\"lastName\"," +
+                        "\"first_name\":\"firstName\"," +
+                        "\"default_address\": {" +
+                            "\"province\":\"Colorado\"," +
+                            "\"province_code\":\"CO\"" +
+                        "}" +
+                    "}" +
+                "}," +
+                "{" +
+                    "\"total_price\":1.1," +
+                    "\"created_at\":\"" + createdAt + "\"," +
+                    "\"line_items\":[" +
+                    "{" +
+                        "\"fulfillable_quantity\":1," +
+                        "\"title\":\"title\"" +
+                    "}," +
+                    "{" +
+                        "\"fulfillable_quantity\":1," +
+                        "\"title\":\"title\"" +
+                    "}," +
+                    "{" +
+                        "\"fulfillable_quantity\":1," +
+                        "\"title\":\"title\"" +
+                    "}]," +
+                    "\"billing_address\":{" +
+                        "\"last_name\":\"billingAddressLastName\"," +
+                        "\"first_name\":\"billingAddressFirstName\"," +
+                        "\"province\":\"California\"," +
+                        "\"province_code\":\"CA\"" +
+                    "}" +
+                "}]" +
+                "}";
 
         // Act
-        ArrayList<Order> result = mSut.fromJson(jsonString);
+        ArrayList<Order> results = mSut.fromJson(jsonString);
 
         // Assert
-        assertThat(result.size()).isEqualTo(2);
-        assertThat(result.get(0).customer.firstName).isEqualTo(orders.get(0).customer.firstName);
-        assertThat(result.get(0).customer.lastName).isEqualTo(orders.get(0).customer.lastName);
-        assertThat(result.get(0).items.size()).isEqualTo(3);
-        assertThat(result.get(0).items.get(0).title).isEqualTo(orders.get(0).items.get(0).title);
-        assertThat(result.get(0).items.get(0).quantity).isEqualTo(orders.get(0).items.get(0).quantity);
-        assertThat(result.get(0).items.get(1).title).isEqualTo(orders.get(0).items.get(1).title);
-        assertThat(result.get(0).items.get(1).quantity).isEqualTo(orders.get(0).items.get(1).quantity);
-        assertThat(result.get(0).items.get(2).title).isEqualTo(orders.get(0).items.get(2).title);
-        assertThat(result.get(0).items.get(2).quantity).isEqualTo(orders.get(0).items.get(2).quantity);
-        assertThat(result.get(1).customer.firstName).isEqualTo(orders.get(1).customer.firstName);
-        assertThat(result.get(1).customer.lastName).isEqualTo(orders.get(1).customer.lastName);
-        assertThat(result.get(1).items.get(0).title).isEqualTo(orders.get(1).items.get(0).title);
-        assertThat(result.get(1).items.get(0).quantity).isEqualTo(orders.get(1).items.get(0).quantity);
-        assertThat(result.get(1).items.get(1).title).isEqualTo(orders.get(1).items.get(1).title);
-        assertThat(result.get(1).items.get(1).quantity).isEqualTo(orders.get(1).items.get(1).quantity);
-        assertThat(result.get(1).items.get(2).title).isEqualTo(orders.get(1).items.get(2).title);
-        assertThat(result.get(1).items.get(2).quantity).isEqualTo(orders.get(1).items.get(2).quantity);
+        assertThat(results.size()).isEqualTo(2);
+        for (int i = 0; i < results.size(); ++i) {
+            Order order = orders.get(i);
+            Order result = results.get(i);
+            assertThat(result.totalPrice).isEqualTo(order.totalPrice);
+            assertThat(result.createdAt).isEqualTo(order.createdAt);
+            assertThat(result.customer.firstName).isEqualTo(order.customer.firstName);
+            assertThat(result.customer.lastName).isEqualTo(order.customer.lastName);
+            assertThat(result.customer.province.provinceCode).isEqualTo(order.customer.province.provinceCode);
+            assertThat(result.customer.province.province).isEqualTo(order.customer.province.province);
+            assertThat(result.items.size()).isEqualTo(order.items.size());
+            for (int j = 0; j < items.size(); ++j) {
+                Item expectedItem = order.items.get(i);
+                Item outputItem = result.items.get(i);
+                assertThat(outputItem.quantity).isEqualTo(expectedItem.quantity);
+                assertThat(outputItem.title).isEqualTo(expectedItem.title);
+            }
+        }
     }
 
     @Test
@@ -110,14 +163,69 @@ public class OrderParserTest {
         items.add(item);
         items.add(item);
 
-        Customer customer = new Customer("firstName", "lastName");
+        Customer customer = new Customer("firstName", "lastName", new Province("CO", "Colorado"));
 
-        Order order = new Order(customer, items, 1.1);
+        String createdAt = "2016-12-05T23:04:52-05:00";
+        Order order = new Order(customer, items, 1.1, createdAt);
         ArrayList<Order> orders = new ArrayList<>();
         orders.add(order);
         orders.add(order);
 
-        String expectedJsonString = "{\"orders\":[{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}},{\"total_price\":1.1,\"line_items\":[{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"},{\"fulfillable_quantity\":1,\"title\":\"title\"}],\"customer\":{\"last_name\":\"lastName\",\"first_name\":\"firstName\"}}]}";
+        String expectedJsonString =
+                "{\"orders\":[" +
+                        "{" +
+                            "\"total_price\":1.1," +
+                            "\"created_at\":\"" + createdAt + "\"," +
+                            "\"line_items\":[" +
+                                "{" +
+                                    "\"fulfillable_quantity\":1," +
+                                    "\"title\":\"title\"" +
+                                "}," +
+                                "{" +
+                                    "\"fulfillable_quantity\":1," +
+                                    "\"title\":\"title\"" +
+                                "}," +
+                                "{" +
+                                    "\"fulfillable_quantity\":1," +
+                                    "\"title\":\"title\"" +
+                                "}]," +
+                            "\"customer\":{" +
+                                "\"default_address\": {" +
+                                    "\"province\":\"Colorado\"," +
+                                    "\"province_code\":\"CO\"" +
+                                "}, " +
+                                "\"last_name\":\"lastName\"," +
+                                "\"first_name\":\"firstName\"" +
+                            "}" +
+                        "}," +
+                        "{" +
+                            "\"total_price\":1.1," +
+                            "\"created_at\":\"" + createdAt + "\"," +
+                            "\"line_items\":[" +
+                                "{" +
+                                    "\"fulfillable_quantity\":1," +
+                                    "\"title\":\"title\"" +
+                                "}," +
+                                "{" +
+                                    "\"fulfillable_quantity\":1," +
+                                    "\"title\":\"title\"" +
+                                "}," +
+                                "{" +
+                                    "\"fulfillable_quantity\":1," +
+                                    "\"title\":\"title\"" +
+                                "}" +
+                            "]," +
+                            "\"customer\":{" +
+                                "\"default_address\": {" +
+                                    "\"province\":\"Colorado\"," +
+                                    "\"province_code\":\"CO\"" +
+                                "}, " +
+                                "\"last_name\":\"lastName\"," +
+                                "\"first_name\":\"firstName\"" +
+                            "}" +
+                        "}" +
+                    "]}";
+
 
         // Act
         String result = mSut.toJson(orders);
