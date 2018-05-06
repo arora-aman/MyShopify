@@ -8,7 +8,7 @@ public class ResourceWrapper<T> {
         LOADING,
         SUCCESS,
         ERROR,
-        REQUEST_FAILED;
+        REQUEST_FAILED
     }
 
     @NonNull public final State state;
