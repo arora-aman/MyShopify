@@ -9,4 +9,19 @@ public class Province {
         this.provinceCode = provinceCode;
         this.province = province;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Province)) {
+            return false;
+        }
+
+        Province province1 = (Province) o;
+
+        return provinceCode.equals(province1.provinceCode) && province.equals(province1.province);
+    }
+
 }
