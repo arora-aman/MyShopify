@@ -2,6 +2,7 @@ package com.aroraaman.myshopify.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -15,7 +16,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     }
 
     @Override
-    public <T extends ViewModel> T create(Class<T> modelClass) {
+    @NonNull
+    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         Provider<? extends ViewModel> provider = mProviders.get(modelClass);
 
         if (provider == null) {
