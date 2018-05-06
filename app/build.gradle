@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.aroraaman.myshopify"
         minSdkVersion 19
@@ -25,18 +25,18 @@ android {
 }
 
 dependencies {
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.11'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.12'
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.android.support:appcompat-v7:26.0.2'
-    implementation 'com.squareup.okhttp3:okhttp:3.8.1'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
-    implementation "android.arch.lifecycle:runtime:1.0.0-alpha9"
-    implementation "android.arch.lifecycle:extensions:1.0.0-alpha9"
-    implementation 'com.google.dagger:dagger:2.11'
+    implementation "android.arch.lifecycle:runtime:1.1.1"
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation 'com.google.dagger:dagger:2.12'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.assertj:assertj-core:2.8.0'
