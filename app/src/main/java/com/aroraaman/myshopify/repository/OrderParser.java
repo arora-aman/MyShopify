@@ -12,15 +12,15 @@ import java.util.ArrayList;
 
 class OrderParser implements IOrderParser {
 
-    private static final String KEY_CUSTOMER = Customer.CUSTOMER_KEY;
-    private static final String KEY_BILLING_ADDRESS= Customer.BILLING_ADDRESS_KEY;
-    private static final String KEY_CUSTOMER_FIRST_NAME = Customer.FIRST_NAME_KEY;
-    private static final String KEY_CUSTOMER_LAST_NAME = Customer.LAST_NAME_KEY;
-    private static final String KEY_TOTAL_PRICE = Order.TOTAL_PRICE_KEY;
-    private static final String KEY_ITEMS = Item.ITEMS_KEY;
-    private static final String KEY_ITEM_TITLE = Item.TITLE_KEY;
-    private static final String KEY_ITEM_QTY = Item.QUANTITY_KEY;
-    private static final String KEY_ORDERS = Order.ORDERS_KEY;
+    private static final String KEY_ORDERS = "orders";
+    private static final String KEY_TOTAL_PRICE = "total_price";
+    private static final String KEY_CUSTOMER = "customer";
+    private static final String KEY_BILLING_ADDRESS = "billing_address";
+    private static final String KEY_CUSTOMER_FIRST_NAME = "first_name";
+    private static final String KEY_CUSTOMER_LAST_NAME = "last_name";
+    private static final String KEY_ITEMS = "line_items";
+    private static final String KEY_ITEM_TITLE = "title";
+    private static final String KEY_ITEM_QTY = "fulfillable_quantity";
 
     @Override
     public ArrayList<Order> fromJson(String jsonString) {
