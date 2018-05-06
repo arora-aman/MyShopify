@@ -11,6 +11,13 @@ public class Province {
     }
 
     @Override
+    public int hashCode() {
+        int result = provinceCode.hashCode();
+        result = 31 * result + province.hashCode();
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -20,7 +27,6 @@ public class Province {
         }
 
         Province province1 = (Province) o;
-
         return provinceCode.equals(province1.provinceCode) && province.equals(province1.province);
     }
 
