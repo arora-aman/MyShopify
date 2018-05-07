@@ -21,4 +21,14 @@ public class ActivityModule {
         return mActivity;
     }
 
+    @PerActivity
+    @Provides
+    IFragmentNavigator provideFragmentNavigation(){
+        if (mActivity instanceof IFragmentNavigator) {
+            return (IFragmentNavigator) mActivity;
+        }
+
+        return null;
+    }
+
 }
