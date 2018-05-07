@@ -1,7 +1,6 @@
 package com.aroraaman.myshopify.myshopify.ui;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
@@ -24,12 +23,6 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, mOrderStatsFragment);
         transaction.commit();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mOrderStatsFragment.onConfigurationChanged(newConfig);
     }
 
     private ActivityComponent component() {

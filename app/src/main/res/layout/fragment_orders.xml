@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/loadingView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/fetching_data" />
+
+    <LinearLayout
+        android:id="@+id/analysisLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/orders_by_year"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+
+        <TextView
+            android:id="@+id/yearReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:padding="@dimen/subheading_padding"
+            android:text="@string/year_report"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/category_separation"
+            android:text="@string/orders_by_province"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+
+        <ListView
+            android:id="@+id/provinceListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@null"
+            android:nestedScrollingEnabled="false" />
+
+    </LinearLayout>
+
+</RelativeLayout>
