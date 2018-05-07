@@ -1,4 +1,4 @@
-package com.aroraaman.myshopify.myshopify.ui
+package com.aroraaman.myshopify.myshopify.ui.orders
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel

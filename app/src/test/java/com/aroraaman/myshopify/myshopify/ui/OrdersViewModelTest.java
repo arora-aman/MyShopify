@@ -4,6 +4,7 @@ import com.aroraaman.myshopify.model.Customer;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
 import com.aroraaman.myshopify.model.Province;
+import com.aroraaman.myshopify.myshopify.ui.orders.OrdersViewModel;
 import com.aroraaman.myshopify.repository.IShopifyRepository;
 
 import org.junit.Before;

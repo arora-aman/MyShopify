@@ -4,7 +4,7 @@ import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 
 import com.aroraaman.myshopify.dagger.ViewModelKey;
-import com.aroraaman.myshopify.myshopify.ui.OrdersViewModel;
+import com.aroraaman.myshopify.myshopify.ui.orders.OrdersViewModel;
 import com.aroraaman.myshopify.repository.IShopifyRepository;
 
 import java.util.Map;

@@ -11,6 +11,7 @@ import android.view.Gravity;
 
 import com.aroraaman.myshopify.R;
 import com.aroraaman.myshopify.myshopify.MyShopifyApplication;
+import com.aroraaman.myshopify.myshopify.ui.orders.OrderStatsFragment;
 
 import org.jetbrains.annotations.NotNull;
 

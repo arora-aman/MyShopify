@@ -1,4 +1,4 @@
-package com.aroraaman.myshopify.myshopify.ui;
+package com.aroraaman.myshopify.myshopify.ui.orders;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProvider;
@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.aroraaman.myshopify.R;
 import com.aroraaman.myshopify.model.Order;
+import com.aroraaman.myshopify.myshopify.ui.MainActivity;
 import com.aroraaman.myshopify.repository.ResourceWrapper;
 
 import java.util.ArrayList;
