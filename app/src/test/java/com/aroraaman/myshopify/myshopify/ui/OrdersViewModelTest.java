@@ -12,7 +12,6 @@ import org.mockito.Mock;
 
 import java.util.ArrayList;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -37,61 +36,6 @@ public class OrdersViewModelTest {
 
         // Assert
         verify(mShopifyRepository).getOrders("https://www.shopify.com/");
-    }
-
-    @Test
-    public void amountSpentProcessor_ordersArrayIsNull_returnsNull() throws Exception {
-        // Arrange
-
-        // Act
-        OrdersViewModel.Data<Double> result = mSut.amountSpentProcessor(null, "", "");
-
-        // Assert
-        assertThat(result).isNull();
-    }
-
-    @Test
-    public void amountSpentProcessor_returnsCorrectValues() throws Exception {
-        // Arrange
-        ArrayList<Order> orders = arrangeTest();
-
-        String firstName = "firstName";
-        String lastName = "lastName";
-        OrdersViewModel.Data expectedResult =
-                new OrdersViewModel.Data<>(12.1, 1.1, firstName + " " + lastName);
-
-        // Act
-        OrdersViewModel.Data<Double> result = mSut.amountSpentProcessor(orders, "firstName", "lastName");
-
-        // Assert
-        assertThat(result).isEqualTo(expectedResult);
-    }
-
-    @Test
-    public void quantityProcessor_ordersArrayIsNull_returnsNull() throws Exception {
-        // Arrange
-
-        // Act
-        OrdersViewModel.Data<Integer> result = mSut.quantityProcessor(null, "");
-
-        // Assert
-        assertThat(result).isNull();
-    }
-
-    @Test
-    public void quantityProcessor_returnsCorrectValues() throws Exception {
-        // Arrange
-        ArrayList<Order> orders = arrangeTest();
-        String title = "title";
-
-        OrdersViewModel.Data expectedResult =
-                new OrdersViewModel.Data<>(10, 16, title);
-
-        // Act
-        OrdersViewModel.Data<Integer> result = mSut.quantityProcessor(orders, title);
-
-        // Assert
-        assertThat(result).isEqualTo(expectedResult);
     }
 
     private ArrayList<Order> arrangeTest() {
