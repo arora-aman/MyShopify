@@ -9,4 +9,9 @@ public class Item {
         this.title = title;
         this.quantity = quantity;
     }
+
+    @Override
+    public String toString() {
+        return  title + " x" + quantity;
+    }
 }

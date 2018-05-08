@@ -11,4 +11,9 @@ public class Customer {
         this.lastName = lastName;
         this.province = province;
     }
+
+    @Override
+    public String toString() {
+        return firstName + " " + lastName;
+    }
 }

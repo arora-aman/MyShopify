@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.aroraaman.myshopify.R;
 import com.aroraaman.myshopify.model.Order;
+import com.aroraaman.myshopify.myshopify.ui.IFragmentNavigator;
 import com.aroraaman.myshopify.myshopify.ui.MainActivity;
 import com.aroraaman.myshopify.repository.ResourceWrapper;
 
@@ -29,8 +30,8 @@ import java.util.Comparator;
 import javax.inject.Inject;
 
 public class OrderStatsFragment extends Fragment {
-    @Inject
-    ViewModelProvider.Factory mFactory;
+    @Inject ViewModelProvider.Factory mFactory;
+    @Inject IFragmentNavigator mFragmentNavigator;
 
     private OrdersViewModel mViewModel;
 
@@ -41,6 +42,8 @@ public class OrderStatsFragment extends Fragment {
     private ListView mProvinceListView;
 
     private ProvinceDataAdapter mProvinceDataAdapter;
+
+    private YearReportFragment mYearReportFragment;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,6 +108,19 @@ public class OrderStatsFragment extends Fragment {
 
             mYearTextView.setText(getString(R.string.year_report, yearData.size(), 2017));
             mProvinceDataAdapter.updateDataSet(provinceData);
+
+            if (mYearReportFragment == null) {
+                mYearReportFragment = YearReportFragment.Companion.newInstance(2017, yearData);
+            } else {
+                mYearReportFragment.updateDataSet(yearData);
+            }
+
+            mYearTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mFragmentNavigator.slideToFragment(mYearReportFragment);
+                }
+            });
 
             mLoadingTextView.setVisibility(View.GONE);
             mAnalysisLayout.setVisibility(View.VISIBLE);
