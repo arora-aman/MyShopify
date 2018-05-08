@@ -38,11 +38,15 @@ public class OrderStatsFragment extends Fragment {
     private TextView mLoadingTextView;
 
     private LinearLayout mAnalysisLayout;
+
     private TextView mYearTextView;
+
+    private TextView mProvinceReportHeading;
     private ListView mProvinceListView;
 
     private ProvinceDataAdapter mProvinceDataAdapter;
 
+    private ProvinceReportFragment mProvinceReportFragment;
     private YearReportFragment mYearReportFragment;
 
     @Override
@@ -61,7 +65,11 @@ public class OrderStatsFragment extends Fragment {
         mProvinceDataAdapter = new ProvinceDataAdapter();
 
         mAnalysisLayout = view.findViewById(R.id.analysisLayout);
+
+
         mYearTextView = view.findViewById(R.id.yearReport);
+
+        mProvinceReportHeading = view.findViewById(R.id.provinceReportHeading);
         mProvinceListView = view.findViewById(R.id.provinceListView);
 
         mProvinceListView.setAdapter(mProvinceDataAdapter);
@@ -115,10 +123,23 @@ public class OrderStatsFragment extends Fragment {
                 mYearReportFragment.updateDataSet(yearData);
             }
 
+            if (mProvinceReportFragment == null) {
+                mProvinceReportFragment = ProvinceReportFragment.Companion.newInstance(provinceData);
+            } else {
+                mProvinceReportFragment.updateProvinceData(provinceData);
+            }
+
             mYearTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mFragmentNavigator.slideToFragment(mYearReportFragment);
+                }
+            });
+
+            mProvinceReportHeading.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mFragmentNavigator.slideToFragment(mProvinceReportFragment);
                 }
             });
 
