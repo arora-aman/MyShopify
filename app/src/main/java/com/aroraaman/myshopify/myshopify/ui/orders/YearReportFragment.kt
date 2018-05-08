@@ -26,12 +26,12 @@ class YearReportFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.fragment_year_report, null)
+        val view = inflater?.inflate(R.layout.fragment_report, null)
 
-        val heading = view?.findViewById<TextView>(R.id.yearReportHeading)
+        val heading = view?.findViewById<TextView>(R.id.reportHeading)
         heading?.text = getString(R.string.year_report_title, mYear)
 
-        mOrdersListView = view?.findViewById(R.id.yearReportOrders)!!
+        mOrdersListView = view?.findViewById(R.id.reportList)!!
         mOrdersListView.adapter = mAdapter
 
         updateDataSet(mOrders)
