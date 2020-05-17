@@ -18,16 +18,16 @@ class ProvinceReportFragment : Fragment() {
 
     private val mAdapter = ProvinceOrdersAdapter()
 
-    lateinit private var mProvinceDataListView: ListView
-    lateinit private var mProvinceData: ArrayList<ProvinceData>
+    private lateinit var mProvinceDataListView: ListView
+    private lateinit var mProvinceData: ArrayList<ProvinceData>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mProvinceData = arguments.getSerializable(KEY_PROVINCE_DATA) as ArrayList<ProvinceData>
+        mProvinceData = arguments?.getSerializable(KEY_PROVINCE_DATA) as ArrayList<ProvinceData>
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.fragment_report, null)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_report, null)
 
         val heading = view?.findViewById<TextView>(R.id.reportHeading)
         heading?.text = getString(R.string.orders_by_province)
@@ -40,13 +40,19 @@ class ProvinceReportFragment : Fragment() {
         return view
     }
 
+    override fun onStop() {
+        super.onStop()
+        mAdapter.moveAllViewsToPool(mProvinceDataListView)
+    }
+
     fun updateProvinceData(data: ArrayList<ProvinceData>) {
         mAdapter.orders = data
     }
 
+
     private class ProvinceOrdersAdapter : BaseAdapter() {
 
-        private val mViewPool = Stack<TextView>()
+        private val mViewPool = Stack<OrderDetailView>()
 
         var orders = ArrayList<ProvinceData>()
             set(value) {
@@ -65,6 +71,22 @@ class ProvinceReportFragment : Fragment() {
         override fun getCount(): Int {
             return orders.size
         }
+
+        fun moveAllViewsToPool(list: ListView) {
+            var i = 0
+            while (true) {
+                val view = (list.getChildAt(i++) ?: return) as LinearLayout
+
+                val holder = view.tag as ProvinceOrdersViewHolder
+
+                holder.orderDetails.forEach { v ->
+                    view.removeView(v)
+                    mViewPool.push(v)
+                }
+            }
+        }
+
+        var count2 = 0
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val data = orders[position]
@@ -88,29 +110,26 @@ class ProvinceReportFragment : Fragment() {
 
             view = view as LinearLayout
 
-            holder.textViews.forEach { v -> view.removeView(v) }
+            holder.orderDetails.forEach { v -> view.removeView(v) }
 
-            while (holder.textViews.size > data.orders.size) {
-                val last = holder.textViews.last()
-                holder.textViews.removeAt(holder.textViews.size - 1)
-                mViewPool.push(last)
+            while (holder.orderDetails.size > data.orders.size) {
+                mViewPool.push(holder.orderDetails.removeAt(holder.orderDetails.size - 1))
             }
 
-            while (holder.textViews.size < data.orders.size && !mViewPool.empty()) {
-                val top = mViewPool.pop()
-                holder.textViews.add(top)
+            while (holder.orderDetails.size < data.orders.size && !mViewPool.empty()) {
+                holder.orderDetails.add(mViewPool.pop())
             }
 
-            while (holder.textViews.size < data.orders.size) {
-                holder.textViews.add(TextView(parent?.context))
+            while (holder.orderDetails.size < data.orders.size) {
+                holder.orderDetails.add(OrderDetailView(parent?.context))
             }
 
             holder.province.text = parent?.context?.getString(R.string.province_title,
                     data.province.province, data.province.provinceCode)
 
             for (i in data.orders.indices) {
-                holder.textViews[i].text = data.orders[i].toString()
-                view.addView(holder.textViews[i])
+                holder.orderDetails[i].setOrder(data.orders[i])
+                view.addView(holder.orderDetails[i])
             }
 
             return view
@@ -118,9 +137,9 @@ class ProvinceReportFragment : Fragment() {
     }
 
     companion object {
-        private class ProvinceOrdersViewHolder(val province: TextView, val textViews: ArrayList<TextView>)
+        private class ProvinceOrdersViewHolder(val province: TextView, val orderDetails: ArrayList<OrderDetailView>)
 
-        private val KEY_PROVINCE_DATA = "KEY_PROVINCE_DATA"
+        private const val KEY_PROVINCE_DATA = "KEY_PROVINCE_DATA"
 
         fun newInstance(data: ArrayList<ProvinceData>): ProvinceReportFragment {
             val fragment = ProvinceReportFragment()

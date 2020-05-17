@@ -3,7 +3,6 @@ package com.aroraaman.myshopify.myshopify.ui.orders
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.TextView
 import com.aroraaman.myshopify.model.Order
 
 class OrdersAdapter : BaseAdapter() {
@@ -29,10 +28,10 @@ class OrdersAdapter : BaseAdapter() {
         var view = convertView
 
         if (view == null) {
-            view = TextView(parent?.context)
+            view = OrderDetailView(parent?.context)
         }
 
-        (view as TextView).text = orders[position].toString()
+        (view as OrderDetailView).setOrder(orders[position])
 
         return view
     }

@@ -1,23 +1,22 @@
 package com.aroraaman.myshopify.repository;
 
-import com.aroraaman.myshopify.BuildConfig;
 import com.aroraaman.myshopify.model.Customer;
 import com.aroraaman.myshopify.model.Item;
 import com.aroraaman.myshopify.model.Order;
 import com.aroraaman.myshopify.model.Province;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 19, constants = BuildConfig.class)
 public class OrderParserTest {
     private OrderParser mSut;
 
@@ -157,80 +156,60 @@ public class OrderParserTest {
     @Test
     public void toJson_validOrdersList_returnsValidJson() throws Exception {
         // Arrange
-        Item item = new Item("title", 1);
+        String expectedItemName = "title";
+        int expectedItemQuantity = 1;
+
+        Item item = new Item(expectedItemName, expectedItemQuantity);
         ArrayList<Item> items = new ArrayList<>();
         items.add(item);
         items.add(item);
         items.add(item);
 
-        Customer customer = new Customer("firstName", "lastName", new Province("CO", "Colorado"));
+        String expectedFirstName = "firstName";
+        String expectedLastName = "lastName";
+        String expectedProvinceCode = "CO";
+        String expectedProvince = "Colorado";
 
-        String createdAt = "2016-12-05T23:04:52-05:00";
-        Order order = new Order(customer, items, 1.1, createdAt);
+        Customer customer = new Customer(expectedFirstName, expectedLastName, new Province(expectedProvinceCode, expectedProvince));
+
+        String expectedCreatedAt = "2016-12-05T23:04:52-05:00";
+        double expectedTotalPrice = 1.1;
+        Order order = new Order(customer, items, expectedTotalPrice, expectedCreatedAt);
         ArrayList<Order> orders = new ArrayList<>();
         orders.add(order);
         orders.add(order);
-
-        String expectedJsonString =
-                "{\"orders\":[" +
-                        "{" +
-                            "\"total_price\":1.1," +
-                            "\"created_at\":\"" + createdAt + "\"," +
-                            "\"line_items\":[" +
-                                "{" +
-                                    "\"fulfillable_quantity\":1," +
-                                    "\"title\":\"title\"" +
-                                "}," +
-                                "{" +
-                                    "\"fulfillable_quantity\":1," +
-                                    "\"title\":\"title\"" +
-                                "}," +
-                                "{" +
-                                    "\"fulfillable_quantity\":1," +
-                                    "\"title\":\"title\"" +
-                                "}]," +
-                            "\"customer\":{" +
-                                "\"default_address\": {" +
-                                    "\"province\":\"Colorado\"," +
-                                    "\"province_code\":\"CO\"" +
-                                "}, " +
-                                "\"last_name\":\"lastName\"," +
-                                "\"first_name\":\"firstName\"" +
-                            "}" +
-                        "}," +
-                        "{" +
-                            "\"total_price\":1.1," +
-                            "\"created_at\":\"" + createdAt + "\"," +
-                            "\"line_items\":[" +
-                                "{" +
-                                    "\"fulfillable_quantity\":1," +
-                                    "\"title\":\"title\"" +
-                                "}," +
-                                "{" +
-                                    "\"fulfillable_quantity\":1," +
-                                    "\"title\":\"title\"" +
-                                "}," +
-                                "{" +
-                                    "\"fulfillable_quantity\":1," +
-                                    "\"title\":\"title\"" +
-                                "}" +
-                            "]," +
-                            "\"customer\":{" +
-                                "\"default_address\": {" +
-                                    "\"province\":\"Colorado\"," +
-                                    "\"province_code\":\"CO\"" +
-                                "}, " +
-                                "\"last_name\":\"lastName\"," +
-                                "\"first_name\":\"firstName\"" +
-                            "}" +
-                        "}" +
-                    "]}";
-
 
         // Act
         String result = mSut.toJson(orders);
 
         // Assert
-        assertThat(result).isEqualToIgnoringWhitespace(expectedJsonString);
+        JSONObject jsonObject = new JSONObject(result);
+        assertThat(jsonObject).isNotNull();
+        assertThat(jsonObject.has("orders")).isTrue();
+
+        JSONArray ordersJson = jsonObject.getJSONArray("orders");
+        assertThat(ordersJson.length()).isEqualTo(2);
+
+        for (int i = 0; i < ordersJson.length(); ++i) {
+            JSONObject orderJson = ordersJson.getJSONObject(i);
+
+            JSONObject customerJson = orderJson.getJSONObject("customer");
+            assertThat(customerJson.getString("first_name")).isEqualTo(expectedFirstName);
+            assertThat(customerJson.getString("last_name")).isEqualTo(expectedLastName);
+            assertThat(customerJson.getJSONObject("default_address").getString("province")).isEqualTo(expectedProvince);
+            assertThat(customerJson.getJSONObject("default_address").getString("province_code")).isEqualTo(expectedProvinceCode);
+
+            assertThat(orderJson.getDouble("total_price")).isEqualTo(expectedTotalPrice);
+            assertThat(orderJson.getString("created_at")).isEqualTo(expectedCreatedAt);
+
+            JSONArray lineItemsJson = orderJson.getJSONArray("line_items");
+            assertThat(lineItemsJson.length()).isEqualTo(3);
+
+            for (int j = 0; j < lineItemsJson.length(); ++j) {
+                JSONObject itemObject = lineItemsJson.getJSONObject(i);
+                assertThat(itemObject.getString("title")).isEqualTo(expectedItemName);
+                assertThat(itemObject.getInt("fulfillable_quantity")).isEqualTo(expectedItemQuantity);
+            }
+        }
     }
 }

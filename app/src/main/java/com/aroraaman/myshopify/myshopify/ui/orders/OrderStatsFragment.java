@@ -132,14 +132,14 @@ public class OrderStatsFragment extends Fragment {
             mYearTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mFragmentNavigator.slideToFragment(mYearReportFragment);
+                    mFragmentNavigator.navigateToFragment(mYearReportFragment);
                 }
             });
 
             mProvinceReportHeading.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mFragmentNavigator.slideToFragment(mProvinceReportFragment);
+                    mFragmentNavigator.navigateToFragment(mProvinceReportFragment);
                 }
             });
 

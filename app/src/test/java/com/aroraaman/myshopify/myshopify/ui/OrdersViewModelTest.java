@@ -94,7 +94,6 @@ public class OrdersViewModelTest {
         ArrayList<Order> orders = arrangeTest();
 
         // Act
-        // TODO: Make this work
         ArrayList<Order> result = mSut.getYearData(orders, 2016);
 
         // Assert

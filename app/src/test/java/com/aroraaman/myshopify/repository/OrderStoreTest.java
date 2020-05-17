@@ -3,7 +3,6 @@ package com.aroraaman.myshopify.repository;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.aroraaman.myshopify.BuildConfig;
 import com.aroraaman.myshopify.model.Order;
 
 import org.junit.Before;
@@ -12,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 
@@ -22,7 +20,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 19, constants = BuildConfig.class)
 public class OrderStoreTest {
     private OrderStore mSut;
 

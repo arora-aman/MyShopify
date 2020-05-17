@@ -14,19 +14,19 @@ class YearReportFragment : Fragment() {
 
     private val mAdapter = OrdersAdapter()
 
-    lateinit private var mOrdersListView: ListView
+    private lateinit var mOrdersListView: ListView
 
-    lateinit private var mOrders: ArrayList<Order>
+    private lateinit var mOrders: ArrayList<Order>
     private var mYear: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mYear = this.arguments.getInt(KEY_YEAR)
-        mOrders = this.arguments.getSerializable(KEY_ORDERS_LIST) as ArrayList<Order>
+        mYear = this.arguments?.getInt(KEY_YEAR) ?: 0
+        mOrders = this.arguments?.getSerializable(KEY_ORDERS_LIST) as ArrayList<Order>
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.fragment_report, null)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_report, null)
 
         val heading = view?.findViewById<TextView>(R.id.reportHeading)
         heading?.text = getString(R.string.year_report_title, mYear)

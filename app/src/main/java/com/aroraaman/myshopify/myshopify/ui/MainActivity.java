@@ -50,7 +50,10 @@ public class MainActivity extends AppCompatActivity implements IFragmentNavigato
         curr.setExitTransition(new Slide(Gravity.LEFT));
         fragment.setEnterTransition(new Slide(Gravity.RIGHT));
 
-        navigateToFragment(fragment);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commitAllowingStateLoss();
     }
 
     @Override
